@@ -1,6 +1,8 @@
 import requests
 
 def lambda_handler(event, context):
+    request_context = event['requestContext']
+
     if not 'headers' in event or not 'Authorization' in event['headers']:
         return {
             'statusCode': 400,
@@ -37,7 +39,10 @@ def lambda_handler(event, context):
             'body': 'Invalid method'
         }
 
+    passthrough_url = f"https://{request_context['domainName']}/{request_context['stage']}/{service_id}"
+    modified_body = response.text.replace(url, passthrough_url)
+
     return {
         'statusCode': response.status_code,
-        'body': response.text
+        'body': modified_body
     }
